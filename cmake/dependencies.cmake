@@ -1,0 +1,5 @@
+find_package(kafka-client REQUIRED)
+find_package(carma-clock REQUIRED)
+find_package(RapidJSON REQUIRED)
+find_package(spdlog REQUIRED)
+find_package(RdKafka REQUIRED)
