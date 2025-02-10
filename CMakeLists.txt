@@ -41,8 +41,11 @@ target_link_libraries(${PROJECT_NAME} PUBLIC
     rapidjson 
     spdlog
 )
+# RPATH required for allowing dpkg-shlibdeps to find stol-apt-repo dependencies
 set_target_properties(${PROJECT_NAME} PROPERTIES
     SOVERSION 1
+    INSTALL_RPATH_USE_LINK_PATH TRUE
+    INSTALL_RPATH "${CMAKE_INSTALL_PREFIX}/lib"
 )
 
 include(CommonSource)
@@ -54,10 +57,8 @@ include(InstallingGeneral)
 include(InstallingConfigs)
 
 if (CREATE_DEB_PACKAGE)
-    include(Packing)
     set(CPACK_DEBIAN_PACKAGE_DEPENDS "kafka-client (>= 1.0), carma-clock (>= 1.0)")
-    set(CPACK_DEBIAN_PACKAGE_SHLIBDEPS ON)
-
+    include(Packing)
 endif()
 
 
