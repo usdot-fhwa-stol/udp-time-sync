@@ -23,9 +23,12 @@ namespace carma_streets_time_sync {
                     while (_time_consumer->is_running()) {
                         std::string time_sync = _time_consumer->consume(1000);
                         SPDLOG_INFO("TimeSync message: {0}", time_sync);
-                        if (!initialized && !time_sync.empty()) {
-                            initialized = true;
-                            SPDLOG_INFO("TimeSync initialized!");
+                        if (!time_sync.empty()) {
+                            if (!initialized) {
+                                initialized = true;
+                                SPDLOG_INFO("TimeSync initialized!");
+                            }
+                            clock->update(read_time_sync_message(time_sync));
                         }
                     }
                     if ( !_time_consumer->is_running()) {
@@ -37,7 +40,7 @@ namespace carma_streets_time_sync {
         }
     }
 
-    unsigned long TimeSync::now() {
+    unsigned long TimeSync::nowInMilliseconds() {
         return clock->nowInMilliseconds();
     }
     void TimeSync::check_initialized() {
@@ -71,4 +74,19 @@ namespace carma_streets_time_sync {
             return default_val;
         }
     }
+
+    unsigned long TimeSync::read_time_sync_message(const std::string &time_sync) {
+        TimeSyncMessage message;
+         rapidjson::Document document;
+        document.Parse(time_sync.c_str());
+
+        if (document.HasParseError()) {
+            throw std::runtime_error( "Parsing error: " + document.GetParseError() );
+        }
+        if (!document.IsObject() && !document.HasMember("timestamp")) {
+            throw std::runtime_error( "Parsing error: time sync message " + time_sync + " is not a valid time sync message!" );    
+        }
+        return document["timestamp"].GetUint64();
+    }
+
 }

@@ -4,6 +4,7 @@
 
 #include <carma-clock/carma_clock.h>
 #include <kafka-client/kafka_client.h>
+#include <rapidjson/document.h>
 
 namespace carma_streets_time_sync {
     struct TimeSyncMessage {
@@ -25,8 +26,11 @@ namespace carma_streets_time_sync {
 
             TimeSync();
             void start();
-            unsigned long now();
+            unsigned long nowInMilliseconds();
             void sleep(unsigned long ms);
             void sleep_until(unsigned long ms);
+            unsigned long read_time_sync_message(const std::string &time_sync);
+
     };
+
 }

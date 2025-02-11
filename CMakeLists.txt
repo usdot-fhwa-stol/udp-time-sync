@@ -9,7 +9,7 @@ set(CMAKE_CXX_STANDARD 17)
 
 
 
-project(carma-streets-time-sync
+project(carma_streets_time_sync
     DESCRIPTION "CARMA Streets Time Synchronization Library"
     HOMEPAGE_URL https://github.com/usdot-fhwa-stol/carma-streets-time-sync
 	VERSION 0.0.1
@@ -40,6 +40,8 @@ target_link_libraries(${PROJECT_NAME} PUBLIC
     ::carma-clock 
     rapidjson 
     spdlog
+    Python3::Python
+    pybind11::module
 )
 # RPATH required for allowing dpkg-shlibdeps to find stol-apt-repo dependencies
 set_target_properties(${PROJECT_NAME} PROPERTIES
@@ -58,6 +60,8 @@ include(InstallingConfigs)
 
 if (CREATE_DEB_PACKAGE)
     set(CPACK_DEBIAN_PACKAGE_DEPENDS "kafka-client (>= 1.0), carma-clock (>= 1.0)")
+    set_target_properties(${PROJECT_NAME} PROPERTIES DEBUG_POSTFIX "")
+
     include(Packing)
 endif()
 
