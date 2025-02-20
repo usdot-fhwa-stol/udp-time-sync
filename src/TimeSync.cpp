@@ -11,31 +11,37 @@ namespace carma_streets_time_sync {
             clock = std::make_unique<fwha_stol::lib::time::CarmaClock>(_simulation_mode);
             if ( _simulation_mode) {
                 // Initalize kafka consumer
-                std::string kafka_broker = get_system_config("KAFKA_BROKER","localhost:9092");
-                std::string kafka_topic = get_system_config("KAFKA_TOPIC","time_sync");
-                std::string kafka_group_id = get_system_config("KAFKA_GROUP_ID","mmitss_time_sync");
-                auto kafka_clients = kafka_clients::kafka_client();
-                _time_consumer = kafka_clients.create_consumer(kafka_broker, kafka_topic, kafka_group_id);
-                _time_consumer->init();
-                _time_consumer->subscribe();
-                _time_consumer->printCurrConf(); 
-                consumer_thread = std::thread([this]() {
-                    while (_time_consumer->is_running()) {
-                        std::string time_sync = _time_consumer->consume(1000);
-                        SPDLOG_INFO("TimeSync message: {0}", time_sync);
-                        if (!time_sync.empty()) {
-                            if (!initialized) {
-                                initialized = true;
-                                SPDLOG_INFO("TimeSync initialized!");
+                SPDLOG_INFO("TimeSync is in simulation mode!");
+                _time_consumer= std::make_unique<udp_socket::UdpServer>("127.0.0.1", 4567 );
+                try {
+                    consumer_thread = std::thread([this]() {
+                        try {
+                            while (true) {
+                                SPDLOG_INFO("Inside thread");
+                                std::string time_sync = _time_consumer->stringTimedReceive(100);
+                                SPDLOG_INFO("Timed Received");
+
+                                SPDLOG_INFO("TimeSync message: {0}", time_sync);
+                                if (!time_sync.empty()) {
+                                    if (!initialized) {
+                                        initialized = true;
+                                    
+                                    SPDLOG_INFO("TimeSync initialized!");
+                                    }
+                                    clock->update(read_time_sync_message(time_sync));
+                                }
                             }
-                            clock->update(read_time_sync_message(time_sync));
                         }
-                    }
-                    if ( !_time_consumer->is_running()) {
-                        SPDLOG_ERROR("Kafka time sync consumer is not running!");
-                        throw std::runtime_error("Kafka time sync consumer is not running!");   
-                    }   
-                });
+                        catch (const std::exception &e) {
+                            SPDLOG_ERROR("TimeSync consumer thread exception: {0}", e.what());
+                        }
+                
+                    });
+                    consumer_thread.detach();
+                }
+                catch (const std::exception &e) {
+                    SPDLOG_ERROR("TimeSync consumer thread exception: {0}", e.what());
+                }
             }
         }
     }

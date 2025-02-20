@@ -36,7 +36,7 @@ target_include_directories(${PROJECT_NAME}
         ${CMAKE_CURRENT_SOURCE_DIR}/src
 )
 target_link_libraries(${PROJECT_NAME} PUBLIC    
-    ::kafka-client 
+    ::udp-socket
     ::carma-clock 
     rapidjson 
     spdlog
@@ -59,7 +59,7 @@ include(InstallingGeneral)
 include(InstallingConfigs)
 
 if (CREATE_DEB_PACKAGE)
-    set(CPACK_DEBIAN_PACKAGE_DEPENDS "kafka-client (>= 1.0), carma-clock (>= 1.0)")
+    set(CPACK_DEBIAN_PACKAGE_DEPENDS "udp-socket (>= 1.0), carma-clock (>= 1.0)")
     set_target_properties(${PROJECT_NAME} PROPERTIES DEBUG_POSTFIX "")
 
     include(Packing)

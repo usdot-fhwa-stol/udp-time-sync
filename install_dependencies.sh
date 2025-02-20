@@ -27,17 +27,7 @@ cmake --install build
 cd .. 
 rm -r spdlog
 
-# Install librdkafka from instructions provided here https://github.com/confluentinc/librdkafka/tree/master/packaging/cmake
-echo " ------> Install librdkafka..."
-cd /tmp
-git clone https://github.com/confluentinc/librdkafka.git -b v2.2.0
-cd librdkafka/
-cmake -H. -B_cmake_build
-cmake --build _cmake_build
-cmake --build _cmake_build --target install
-cd ../
-rm -r librdkafka
 
-/opt/carma/scripts/install_dependencies_script.sh python3-dev carma-clock-1 kafka-client-1
+/opt/carma/scripts/install_dependencies_script.sh python3-dev carma-clock-1 udp-socket-1
 
 ldconfig

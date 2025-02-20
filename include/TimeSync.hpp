@@ -3,9 +3,8 @@
 #include <spdlog/spdlog.h>
 
 #include <carma-clock/carma_clock.h>
-#include <kafka-client/kafka_client.h>
 #include <rapidjson/document.h>
-
+#include <udp-socket/UdpServer.hpp>
 namespace carma_streets_time_sync {
     struct TimeSyncMessage {
         unsigned long timestamp;
@@ -17,7 +16,7 @@ namespace carma_streets_time_sync {
             bool initialized = false;
             bool _simulation_mode = false;
             std::thread consumer_thread;
-            std::shared_ptr<kafka_clients::kafka_consumer_worker> _time_consumer;          
+            std::unique_ptr<udp_socket::UdpServer> _time_consumer;          
             std::unique_ptr<fwha_stol::lib::time::CarmaClock> clock;
             std::string get_system_config(const char *config_name, const std::string &default_val) const noexcept;
             void check_initialized();

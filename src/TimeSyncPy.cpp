@@ -20,7 +20,7 @@ PYBIND11_MODULE(libcarma_streets_time_sync, m)
         .def("nowInMilliseconds", &carma_streets_time_sync::TimeSync::nowInMilliseconds ,
             R"(Get current time in milliseconds)")
         .def("start", &carma_streets_time_sync::TimeSync::start, 
-            R"(Return True if simulation mode set to True and False if not.)")
+            R"(Starts independent thread to consume time sync messages)")
         .def("sleep_until", &carma_streets_time_sync::TimeSync::sleep_until, py::arg("future_time"),
             R"(Method will block thread until given time (ms))")
         .def("sleep_for", &carma_streets_time_sync::TimeSync::sleep, py::arg("time_to_sleep"),
