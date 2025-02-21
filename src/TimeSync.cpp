@@ -1,15 +1,24 @@
 #include "TimeSync.hpp"
 
-namespace carma_streets_time_sync {
+namespace time_sync {
     TimeSync::TimeSync(const std::string &ip , unsigned int port ) : initialized(false), _ip(ip), _port(port)  {}
  
     void TimeSync::start() {
         if (!initialized) {
             // Intialize carma clock
-            std::string sim_mode_string = getSystemConfig("SIMULATION_MODE","TRUE");
+            std::string sim_mode_string = getSystemConfig("SIMULATION_MODE","FALSE");
             _simulation_mode = sim_mode_string.compare("true") == 0 || sim_mode_string.compare("TRUE") == 0 ;
+
+            
             clock = std::make_unique<fwha_stol::lib::time::CarmaClock>(_simulation_mode);
             if ( _simulation_mode) {
+                std::string performance_logging = getSystemConfig("PERFORMANCE_LOGGING","FALSE");
+                _performance_logging = performance_logging.compare("true") == 0 || performance_logging.compare("TRUE") == 0 ;
+                if (_performance_logging) {
+                    SPDLOG_DEBUG("Performance logging is enabled!");
+                    auto logger = createLogger("performance", ".csv", "%v", spdlog::level::info);
+                    logger->info("Real Time (ms), Carma Time (ms)");
+                }
                 // Initalize kafka consumer
                 SPDLOG_INFO("TimeSync is in simulation mode!");
                 _time_consumer= std::make_unique<udp_socket::UdpServer>(_ip, _port);
@@ -31,7 +40,15 @@ namespace carma_streets_time_sync {
                     initialized = true;
                     SPDLOG_DEBUG("TimeSync initialized!");
                 }
-                clock->update(readTimeSyncMessage(time_sync).timestamp);
+                auto message = readTimeSyncMessage(time_sync);
+                clock->update(message.timestamp);
+                if (_performance_logging) {
+                    if(auto logger = spdlog::get("performance"); logger != nullptr ){
+                        logger->info("{0},{1}", 
+                            std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch()).count(), 
+                            clock->nowInMilliseconds());
+                    }
+                }
             }
         }
     }
@@ -50,7 +67,7 @@ namespace carma_streets_time_sync {
         clock->sleep_until(ms);
     }
 
-    std::string TimeSync::getSystemConfig(const char *config_name, const std::string &default_val) const noexcept{
+    std::string getSystemConfig(const char *config_name, const std::string &default_val) {
         // Check for config_name nullptr and use default value
         if (config_name == nullptr ) {
             SPDLOG_WARN("System config_name was nullptr! Using default value {0}!" , default_val);
@@ -86,6 +103,19 @@ namespace carma_streets_time_sync {
         message.timestep =  document["timestep"].GetUint64();
         return message;
 
+    }
+    std::shared_ptr<spdlog::logger> createLogger(const std::string &name, const std::string &extension, const std::string &pattern, const spdlog::level::level_enum &level){
+        std::string log_dir = getSystemConfig("LOGS_DIR","/opt/carma/logs/");
+        std::string date_time = std::to_string(std::chrono::system_clock::to_time_t(std::chrono::system_clock::now()));
+        auto logger  = spdlog::basic_logger_mt<spdlog::async_factory>(
+                name,  // logger name
+                log_dir + name +date_time + extension  // log file name and path
+            );
+        // Only log log statement content
+        logger->set_pattern(pattern);
+        logger->set_level(level);
+        logger->flush_on(level);
+        return logger;
     }
 
 }

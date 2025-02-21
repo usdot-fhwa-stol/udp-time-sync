@@ -1,5 +1,5 @@
 # UDP Time Sync
-This C++ library is meant to help integrate services into our [CDA Sim](https://github.com/usdot-fhwa-stol/cdasim) environment by allowing services to replace direct calls to system time with calls to our [CARMA Clock](https://github.com/usdot-fhwa-stol/carma-time-lib) time abstration. When an environment variable called `SIMULATION_MODE` is set to `TRUE`, this library will start a detached thread responsible for listening on a configurable port of incoming UDP Time Synchronization messages that will allow services in the simulation environment to renaming synchronized to dynamic timestep durations.
+This C++ library is meant to help integrate services into our [CDA Sim](https://github.com/usdot-fhwa-stol/cdasim) environment by allowing services to replace direct calls to system time with calls to our [CARMA Clock](https://github.com/usdot-fhwa-stol/carma-time-lib) time abstration. When an environment variable called `SIMULATION_MODE` is set to `TRUE`, this library will start a detached thread responsible for listening on a configurable port of incoming UDP Time Synchronization messages that will allow services in the simulation environment to synchronize to dynamic timestep durations.
 
 ## CI Status
 
@@ -32,12 +32,37 @@ The UDP Time Sync library is one the the FHWA (Federal Highway Administration) S
 # Get ubuntu distribution code name. All STOL APT debian packages are pushed to S3 bucket based on distribution codename.
 . /etc/lsb-release
 # add the STOL APT repository
-echo "deb [trusted=yes] http://s3.amazonaws.com/stol-apt-repository ${DISTRIB_CODENAME} main" > /etc/apt/sources.list.d/stol-apt-repository.list
+echo "deb [trusted=yes] http://s3.amazonaws.com/stol-apt-repository develop ${DISTRIB_CODENAME} " > /etc/apt/sources.list.d/stol-apt-repository.list
 apt update
-apt install udp-time-sync-1
+apt install carma-clock-1 udp-socket-1 udp-time-sync-1
 ```
 
 This steps above add the relevent STOL apt repository for pulling correct debian package.
+
+To add to you CMake Project simply
+```CMake
+list(APPEND CMAKE_PREFIX_PATH "/opt/carma/cmake/")
+
+find_package(udp-time-sync REQUIRED)
+
+target_link_libraries(${PROJECT_NAME} PUBLIC ::udp-time-sync)
+
+```
+To include in python simply 
+```python
+import importlib
+libTimeSync = importlib.import_module("libudp_time_sync")
+```
+> [!IMPORTANT]  
+> The Python Path needs to include a path to the installed .so file.
+```
+export PYTHONPATH="$PYTHONPATH:/opt/carma/lib"
+```
+### Configuration
+Several environment variables allow you to configure the functionality of this library. 
+`SIMULATION_MODE` is an environment variable that when set to `TRUE` launches a thread to listen for time sync messages and update the underlying carma clock object. When set to false the carma clock object simply functions as regular system time.
+`PERFORMANCE_LOGGING` is an environment variable that creates a file logger that will log real time vs simulation time in a CSV file to evaluate time sychronization
+`LOGS_DIR` is an enviroment variable that allows you to specify where this log file will be written to.
 
 ## Contribution
 

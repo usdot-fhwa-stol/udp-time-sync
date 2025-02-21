@@ -5,9 +5,12 @@
 #include <carma-clock/carma_clock.h>
 #include <rapidjson/document.h>
 #include <udp-socket/UdpServer.hpp>
-#include <atomic>
+#include <spdlog/spdlog.h>
+#include <spdlog/async.h> //support for async logging.
+#include <spdlog/sinks/basic_file_sink.h>
+#include <spdlog/sinks/stdout_color_sinks.h> // or "../stdout_sinks.h" if no colors needed
 
-namespace carma_streets_time_sync {
+namespace time_sync {
     /**
      * TimeSyncMessage struct
      */
@@ -22,6 +25,7 @@ namespace carma_streets_time_sync {
         private:
             bool initialized = false;
             bool _simulation_mode = false;
+            bool _performance_logging = false;
 
             std::string _ip;
             unsigned int _port;
@@ -29,7 +33,9 @@ namespace carma_streets_time_sync {
             std::thread consumer_thread;
             std::unique_ptr<udp_socket::UdpServer> _time_consumer;          
             std::unique_ptr<fwha_stol::lib::time::CarmaClock> clock;
-            std::string getSystemConfig(const char *config_name, const std::string &default_val) const noexcept;
+            /**
+             * Loop to consume time sync messages from UDP server and update carma clock
+             */
             void consumeTimeLoop();
 
         public:
@@ -67,4 +73,8 @@ namespace carma_streets_time_sync {
     };
     TimeSyncMessage readTimeSyncMessage(const std::string &time_sync);
 
+    std::string getSystemConfig(const char *config_name, const std::string &default_val) ;
+
+
+    std::shared_ptr<spdlog::logger> createLogger(const std::string &name, const std::string &extension, const std::string &pattern, const spdlog::level::level_enum &level);
 }
