@@ -24,7 +24,6 @@ class TestCarmaClock(unittest.TestCase):
         timeSync.start()
 
         client_socket.sendto(message.encode('utf-8'), SERVER_ADDRESS)
-        time.sleep(1)
         self.assertEqual( timeSync.nowInMilliseconds(), 100)
         client_socket.close()
 

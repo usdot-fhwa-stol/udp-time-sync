@@ -63,8 +63,8 @@ namespace carma_streets_time_sync {
              * @param time_sync Time sync message
              * @return Timestamp of the time sync message
              */
-            unsigned long readTimeSyncMessage(const std::string &time_sync);
 
     };
+    TimeSyncMessage readTimeSyncMessage(const std::string &time_sync);
 
 }

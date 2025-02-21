@@ -31,19 +31,22 @@ namespace carma_streets_time_sync {
                     initialized = true;
                     SPDLOG_DEBUG("TimeSync initialized!");
                 }
-                clock->update(readTimeSyncMessage(time_sync));
+                clock->update(readTimeSyncMessage(time_sync).timestamp);
             }
         }
     }
     unsigned long TimeSync::nowInMilliseconds() const{
+        clock->wait_for_initialization();
         return clock->nowInMilliseconds();
     }
 
     void TimeSync::sleep(unsigned long ms) {
+        clock->wait_for_initialization();
         clock->sleep_for(ms);
     }
 
     void TimeSync::sleepUntil(unsigned long ms) {
+        clock->wait_for_initialization();
         clock->sleep_until(ms);
     }
 
@@ -65,18 +68,24 @@ namespace carma_streets_time_sync {
         }
     }
 
-    unsigned long TimeSync::readTimeSyncMessage(const std::string &time_sync) {
+    TimeSyncMessage readTimeSyncMessage(const std::string &time_sync) {
         TimeSyncMessage message;
-         rapidjson::Document document;
+        rapidjson::Document document;
         document.Parse(time_sync.c_str());
-
+        SPDLOG_INFO("Parsing time sync message: {0}", time_sync);
         if (document.HasParseError()) {
             throw std::runtime_error( "Parsing error: " + document.GetParseError() );
         }
-        if (!document.IsObject() && !document.HasMember("timestamp")) {
+        if (!document.IsObject() || !document.HasMember("timestamp") || !document["timestamp"].IsUint64()) {
             throw std::runtime_error( "Parsing error: time sync message " + time_sync + " is not a valid time sync message!" );    
         }
-        return document["timestamp"].GetUint64();
+        message.timestamp =  document["timestamp"].GetUint64();
+        if (!document.IsObject() || !document.HasMember("timestep") || !document["timestep"].IsUint64()) {
+            throw std::runtime_error( "Parsing error: time sync message " + time_sync + " is not a valid time sync message!" );    
+        }
+        message.timestep =  document["timestep"].GetUint64();
+        return message;
+
     }
 
 }
