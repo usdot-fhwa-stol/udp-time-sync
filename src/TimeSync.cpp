@@ -13,21 +13,12 @@ namespace carma_streets_time_sync {
                 // Initalize kafka consumer
                 SPDLOG_INFO("TimeSync is in simulation mode!");
                 _time_consumer= std::make_unique<udp_socket::UdpServer>(_ip, _port);
-                try {
-                    consumer_thread = std::thread([this]() {
-                        try {
-                            consumeTimeLoop();                        
-                        }
-                        catch (const std::exception &e) {
-                            SPDLOG_ERROR("TimeSync consumer thread exception: {0}", e.what());
-                        }
-                    });
-                    consumer_thread.detach();
-
-                }
-                catch (const std::exception &e) {
-                    SPDLOG_ERROR("TimeSync consumer thread exception: {0}", e.what());
-                }
+                consumer_thread = std::thread([this]() {
+                    
+                    consumeTimeLoop();                        
+                    
+                });
+                consumer_thread.detach();
             }
         }
     }

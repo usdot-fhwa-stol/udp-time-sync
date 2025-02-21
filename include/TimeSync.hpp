@@ -47,7 +47,7 @@ namespace carma_streets_time_sync {
              * Get current time in milliseconds
              * @return Current time in milliseconds
              */
-            unsigned long nowInMilliseconds();
+            unsigned long nowInMilliseconds() const;
             /**
              * Method will block thread for given time (ms)
              * @param ms Time to sleep in milliseconds
