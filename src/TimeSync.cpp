@@ -37,17 +37,13 @@ namespace time_sync {
                 // Initalize kafka consumer
                 SPDLOG_INFO("TimeSync is in simulation mode!");
                 _time_consumer= std::make_unique<udp_socket::UdpServer>(_ip, _port);
-                consumer_thread = std::thread([this]() {
-                    
-                    consumeTimeLoop();                        
-                    
-                });
+                consumer_thread = std::thread(&TimeSync::consumeTimeLoop, this);
                 consumer_thread.detach();
             }
         }
     }
     void TimeSync::consumeTimeLoop() {
-        while (true) {
+        while (_running) {
             std::string time_sync = _time_consumer->stringTimedReceive(100);
             SPDLOG_DEBUG("TimeSync message: {0}", time_sync);
             if (!time_sync.empty()) {
@@ -81,6 +77,12 @@ namespace time_sync {
         clock->wait_for_initialization();
         clock->sleep_until(ms);
     }
+    void TimeSync::stop() {
+        _running = false;
+        if (consumer_thread.joinable()) {
+            consumer_thread.join();
+        }
+    }
 
     std::string getSystemConfig(const char *config_name, const std::string &default_val) {
         // Check for config_name nullptr and use default value
@@ -104,7 +106,7 @@ namespace time_sync {
         TimeSyncMessage message;
         rapidjson::Document document;
         document.Parse(time_sync.c_str());
-        SPDLOG_INFO("Parsing time sync message: {0}", time_sync);
+        SPDLOG_DEBUG("Parsing time sync message: {0}", time_sync);
         if (document.HasParseError()) {
             throw std::runtime_error( "Parsing error: " + document.GetParseError() );
         }

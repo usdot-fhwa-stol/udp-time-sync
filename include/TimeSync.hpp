@@ -24,7 +24,7 @@
 #include <spdlog/async.h> //support for async logging.
 #include <spdlog/sinks/basic_file_sink.h>
 #include <spdlog/sinks/stdout_color_sinks.h> // or "../stdout_sinks.h" if no colors needed
-
+#include <atomic>
 namespace time_sync {
     /**
      * TimeSyncMessage struct
@@ -41,6 +41,7 @@ namespace time_sync {
             bool initialized = false;
             bool _simulation_mode = false;
             bool _performance_logging = false;
+            std::atomic<bool> _running = true;
 
             std::string _ip;
             unsigned int _port;
@@ -80,16 +81,32 @@ namespace time_sync {
              */
             void sleepUntil(unsigned long ms);
             /**
-             * Read time sync message
-             * @param time_sync Time sync message
-             * @return Timestamp of the time sync message
+             * Stop the time sync thread
              */
+            void stop();
 
     };
+    /**
+     * Read time sync message
+     * @param time_sync Time sync message
+     * @return Timestamp of the time sync message
+     */
     TimeSyncMessage readTimeSyncMessage(const std::string &time_sync);
-
+    /**
+     * Get system config value (environment variable)
+     * @param config_name Name of the config
+     * @param default_val Default value if config is not set
+     * @return Value of the config 
+     */
     std::string getSystemConfig(const char *config_name, const std::string &default_val) ;
 
-
+    /**
+     * Create a logger
+     * @param name Name of the logger
+     * @param extension Extension of the log file
+     * @param pattern Pattern of the log message
+     * @param level Log level
+     * @return Shared pointer to the logger
+     */
     std::shared_ptr<spdlog::logger> createLogger(const std::string &name, const std::string &extension, const std::string &pattern, const spdlog::level::level_enum &level);
 }

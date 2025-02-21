@@ -50,15 +50,19 @@ TEST(TimeSync, readTimeSyncMessageInvalid) {
 
 TEST(TimeSync, testStart) {
     setenv("SIMULATION_MODE", "TRUE", 1);
-    setenv("PERFORMANCE_LOGGING", "TRUE", 1);
+    // setenv("PERFORMANCE_LOGGING", "TRUE", 1);
 
     time_sync::TimeSync time_sync;
     time_sync.start();  
     udp_socket::UdpClient client("127.0.0.1", 4567);
     std::string time_sync_message = "{\"timestamp\": 1231, \"timestep\": 1000}";
     client.Send(time_sync_message);
-    sleep(1);
     EXPECT_EQ(time_sync.nowInMilliseconds(), 1231); 
     EXPECT_NO_THROW(time_sync.sleepUntil(1231));
+    time_sync.stop();
+    // Allow time for thread to stop
+    sleep(1);
+
+
 
 }

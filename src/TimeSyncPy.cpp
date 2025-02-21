@@ -34,6 +34,8 @@ PYBIND11_MODULE(libudp_time_sync, m)
             R"(Get current time in milliseconds)")
         .def("start", &time_sync::TimeSync::start, 
             R"(If in simulation mode, starts independent thread to consume time sync messages and update carma-clock)")
+        .def("stop", &time_sync::TimeSync::stop, 
+            R"(If in simulation mode, stops independent thread to consume time sync messages and update carma-clock)")
         .def("sleepUntil", &time_sync::TimeSync::sleepUntil, py::arg("future_time"),
             R"(Method will block thread until given time (ms))")
         .def("sleep_for", &time_sync::TimeSync::sleep, py::arg("time_to_sleep"),
