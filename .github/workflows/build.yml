@@ -8,6 +8,7 @@ on:
      - develop
      - 'release/*'
      - 'feature*'
+     - 'tt-138-create-time-sync-library'
    tags:
      - 'carma-system-*'
 jobs:
