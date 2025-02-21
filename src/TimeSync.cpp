@@ -35,7 +35,7 @@ namespace carma_streets_time_sync {
             }
         }
     }
-    unsigned long TimeSync::nowInMilliseconds() {
+    unsigned long TimeSync::nowInMilliseconds() const{
         return clock->nowInMilliseconds();
     }
 
