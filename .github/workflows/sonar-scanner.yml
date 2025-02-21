@@ -14,7 +14,7 @@ jobs:
   sonarcloud:
     uses: usdot-fhwa-stol/actions/.github/workflows/sonar-scanner-cpp.yml@main
     with:
-      sonar-project-key: usdot-fhwa-stol_carma-streets-time-sync
+      sonar-project-key: usdot-fhwa-stol_udp-time-sync
       build-image-tag: jammy
     secrets:
       github-token: ${{ secrets.GITHUB_TOKEN }}

@@ -3,25 +3,23 @@
 #include "TimeSync.hpp"
 namespace py = pybind11;
 
-PYBIND11_MODULE(libcarma_streets_time_sync, m)
+PYBIND11_MODULE(libudp_time_sync, m)
 {
-    m.doc() = R"(CARMA Time Module provides the CarmaClock object, which is a 
-        wrapper for direct calls to system time. It is intended for use when it is 
-        necessary to have control over each increment in time. An example of a use 
-        case is in a simulation environment where time may progress non-linearly. 
-        The CarmaClock constructor takes a boolean parameter to indicate whether 
-        to directly make calls to system time or to use its internal store value
-        for time. Calls to its update() method will update the internal stored value,
-        while calls to its now* or sleep* will return or unblock threads depending 
-        on the stored value respectively.)";
+    m.doc() = R"(This C++ library is meant to help integrate services into our [CDA Sim](https://github.com/usdot-fhwa-stol/cdasim)
+         environment by allowing services to replace direct calls to system time with calls to our 
+         [CARMA Clock](https://github.com/usdot-fhwa-stol/carma-time-lib) time abstration. When an environment variable called 
+         `SIMULATION_MODE` is set to `TRUE`, this library will start a detached thread responsible for listening on a configurable 
+         port of incoming UDP Time Synchronization messages that will allow services in the simulation environment to renaming synchronized 
+         to dynamic timestep durations.)";
 
     py::class_<carma_streets_time_sync::TimeSync>(m, "TimeSync")
-        .def(py::init<>())
+        .def(py::init<std::string, unsigned int>(), py::arg("ip") = "127.0.0.1", py::arg("port") = 4567,
+            R"(Constructor for TimeSync object)")
         .def("nowInMilliseconds", &carma_streets_time_sync::TimeSync::nowInMilliseconds ,
             R"(Get current time in milliseconds)")
         .def("start", &carma_streets_time_sync::TimeSync::start, 
-            R"(Starts independent thread to consume time sync messages)")
-        .def("sleep_until", &carma_streets_time_sync::TimeSync::sleep_until, py::arg("future_time"),
+            R"(If in simulation mode, starts independent thread to consume time sync messages and update carma-clock)")
+        .def("sleepUntil", &carma_streets_time_sync::TimeSync::sleepUntil, py::arg("future_time"),
             R"(Method will block thread until given time (ms))")
         .def("sleep_for", &carma_streets_time_sync::TimeSync::sleep, py::arg("time_to_sleep"),
             R"(Method will block thread for given time (ms))");

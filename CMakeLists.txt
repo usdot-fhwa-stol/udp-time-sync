@@ -9,7 +9,7 @@ set(CMAKE_CXX_STANDARD 17)
 
 
 
-project(carma_streets_time_sync
+project(udp_time_sync
     DESCRIPTION "CARMA Streets Time Synchronization Library"
     HOMEPAGE_URL https://github.com/usdot-fhwa-stol/carma-streets-time-sync
 	VERSION 0.0.1
@@ -44,10 +44,11 @@ target_link_libraries(${PROJECT_NAME} PUBLIC
     pybind11::module
 )
 # RPATH required for allowing dpkg-shlibdeps to find stol-apt-repo dependencies
-set_target_properties(${PROJECT_NAME} PROPERTIES
+set_target_properties( ${PROJECT_NAME} PROPERTIES
     SOVERSION 1
     INSTALL_RPATH_USE_LINK_PATH TRUE
     INSTALL_RPATH "${CMAKE_INSTALL_PREFIX}/lib"
+    
 )
 
 include(CommonSource)
@@ -57,11 +58,14 @@ if (BUILD_TESTS)
 endif()
 include(InstallingGeneral)
 include(InstallingConfigs)
+if (BUILD_TESTS)
+    file(COPY test/python_timesync_test.py DESTINATION ${CMAKE_BINARY_DIR})
+    add_test(NAME test_python_module_binding COMMAND ${PYTHON_EXECUTABLE} ${CMAKE_BINARY_DIR}/python_timesync_test.py )
+endif()
 
 if (CREATE_DEB_PACKAGE)
-    set(CPACK_DEBIAN_PACKAGE_DEPENDS "udp-socket (>= 1.0), carma-clock (>= 1.0)")
+    set(CPACK_DEBIAN_PACKAGE_DEPENDS "udp-socket (>= 1.0), carma-clock (>= 1.0), python3-dev")
     set_target_properties(${PROJECT_NAME} PROPERTIES DEBUG_POSTFIX "")
-
     include(Packing)
 endif()
 

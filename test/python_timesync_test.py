@@ -1,19 +1,18 @@
 #!/usr/bin/python3
 import unittest
 import importlib
-libTimeSync = importlib.import_module("libcarma_streets_time_sync")
+libTimeSync = importlib.import_module("libudp_time_sync")
 # import libcarma_clock
 import time
 
 
-"""Test Case for testing basic CarmaClock functionality in python
+"""Test Case for testing basic udp-time-sync functionality in python
 """
 class TestCarmaClock(unittest.TestCase):
 
     def testSimClockInitializeException(self):
         timeSync = libTimeSync.TimeSync()
         import socket
-        print("Starting timeSync ..")
         # Define the server's address and port
         SERVER_ADDRESS = ('127.0.0.1', 4567)
 
@@ -22,7 +21,6 @@ class TestCarmaClock(unittest.TestCase):
 
         # Send data to the server
         message = r'{"timestep": 1, "timestamp": 100}'
-        print("Sending Message")
         timeSync.start()
 
         client_socket.sendto(message.encode('utf-8'), SERVER_ADDRESS)

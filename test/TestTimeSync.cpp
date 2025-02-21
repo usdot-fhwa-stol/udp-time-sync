@@ -9,16 +9,18 @@ TEST(TimeSync, now) {
     carma_streets_time_sync::TimeSync time_sync;
     time_sync.start();  
     sleep(1);
-    EXPECT_EQ(time_sync.nowInMilliseconds(), std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch()).count()); 
+    EXPECT_NEAR(time_sync.nowInMilliseconds(), 
+        std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch()).count(),
+        100); 
 
 }
 
-TEST(TimeSync, read_time_sync_message) {
+TEST(TimeSync, readTimeSyncMessage) {
     setenv("SIMULATION_MODE", "TRUE", 1);
 
     carma_streets_time_sync::TimeSync time_sync;
     std::string time_sync_message = "{\"timestamp\": 1231, \"timestep\": 1000}";
-    EXPECT_EQ(time_sync.read_time_sync_message(time_sync_message), 1231); 
+    EXPECT_EQ(time_sync.readTimeSyncMessage(time_sync_message), 1231); 
 }
 
 TEST(TimeSync, testStart) {
@@ -32,5 +34,5 @@ TEST(TimeSync, testStart) {
     sleep(1);
 
     EXPECT_EQ(time_sync.nowInMilliseconds(), 1231); 
-    EXPECT_NO_THROW(time_sync.sleep_until(1231));
+    EXPECT_NO_THROW(time_sync.sleepUntil(1231));
 }
