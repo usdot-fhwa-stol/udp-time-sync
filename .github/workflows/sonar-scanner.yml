@@ -1,0 +1,22 @@
+on:
+  workflow_dispatch:
+  # Trigger analysis when pushing in master or pull requests, and when creating
+  # a pull request.
+  push:
+   branches:
+     - 'master'
+     - 'develop'
+     - 'release/*'
+     - 'feature/*'
+  pull_request:
+      types: [opened, synchronize, reopened]
+name: Sonar Workflow
+jobs:
+  sonarcloud:
+    uses: usdot-fhwa-stol/actions/.github/workflows/sonar-scanner-cpp.yml@main
+    with:
+      sonar-project-key: usdot-fhwa-stol_udp-time-sync
+      build-image-tag: jammy
+    secrets:
+      github-token: ${{ secrets.GITHUB_TOKEN }}
+      sonarcloud-token: ${{ secrets.SONAR_TOKEN }}
