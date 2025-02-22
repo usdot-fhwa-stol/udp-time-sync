@@ -60,5 +60,7 @@ TEST(TimeSync, testStart) {
     EXPECT_EQ(time_sync.nowInMilliseconds(), 1231); 
     EXPECT_NO_THROW(time_sync.sleepUntil(1231));
     time_sync.stop();
+    // time for thread cleanup
+    sleep(1);
 
 }
