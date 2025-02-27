@@ -25,7 +25,7 @@ namespace time_sync {
             _simulation_mode = sim_mode_string.compare("true") == 0 || sim_mode_string.compare("TRUE") == 0 ;
 
             
-            clock = std::make_unique<fwha_stol::lib::time::CarmaClock>(_simulation_mode);
+            ClockSingleton::create(_simulation_mode);
             if ( _simulation_mode) {
                 std::string performance_logging = getSystemConfig("PERFORMANCE_LOGGING","FALSE");
                 _performance_logging = performance_logging.compare("true") == 0 || performance_logging.compare("TRUE") == 0 ;
@@ -52,38 +52,35 @@ namespace time_sync {
                     SPDLOG_DEBUG("TimeSync initialized!");
                 }
                 auto message = readTimeSyncMessage(time_sync);
-                clock->update(message.timestamp);
+                ClockSingleton::update(message.timestamp);
                 if (_performance_logging) {
                     if(auto logger = spdlog::get("performance"); logger != nullptr ){
                         logger->info("{0},{1}", 
                             std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch()).count(), 
-                            clock->nowInMilliseconds());
+                            ClockSingleton::time_in_ms());
                     }
                 }
             }
         }
     }
-    unsigned long TimeSync::nowInMilliseconds() const{
-        clock->wait_for_initialization();
-        return clock->nowInMilliseconds();
-    }
-
-    void TimeSync::sleep(unsigned long ms) {
-        clock->wait_for_initialization();
-        clock->sleep_for(ms);
-    }
-
-    void TimeSync::sleepUntil(unsigned long ms) {
-        clock->wait_for_initialization();
-        clock->sleep_until(ms);
-    }
+    
     void TimeSync::stop() {
         _running = false;
         if (consumer_thread.joinable()) {
             consumer_thread.join();
         }
     }
+    unsigned long nowInMilliseconds(){
+        return ClockSingleton::time_in_ms();
+    }
 
+    void sleep(unsigned long ms) {
+        ClockSingleton::sleep_for(ms);
+    }
+
+    void sleepUntil(unsigned long ms) {
+        ClockSingleton::sleep_until(ms);
+    }
     std::string getSystemConfig(const char *config_name, const std::string &default_val) {
         // Check for config_name nullptr and use default value
         if (config_name == nullptr ) {

@@ -17,7 +17,7 @@
 #include <thread>
 #include <spdlog/spdlog.h>
 
-#include <carma-clock/carma_clock.h>
+#include "ClockSingleton.hpp"
 #include <rapidjson/document.h>
 #include <udp-socket/UdpServer.hpp>
 #include <spdlog/spdlog.h>
@@ -48,7 +48,6 @@ namespace time_sync {
 
             std::thread consumer_thread;
             std::unique_ptr<udp_socket::UdpServer> _time_consumer;          
-            std::unique_ptr<fwha_stol::lib::time::CarmaClock> clock;
             /**
              * Loop to consume time sync messages from UDP server and update carma clock
              */
@@ -65,27 +64,28 @@ namespace time_sync {
              * If in simulation mode, starts independent thread to consume time sync messages and update carma-clock
              */
             void start();
-            /**
-             * Get current time in milliseconds
-             * @return Current time in milliseconds
-             */
-            unsigned long nowInMilliseconds() const;
-            /**
-             * Method will block thread for given time (ms)
-             * @param ms Time to sleep in milliseconds
-             */
-            void sleep(unsigned long ms);
-            /**
-             * Method will block thread until given time (ms)
-             * @param ms Future time in milliseconds
-             */
-            void sleepUntil(unsigned long ms);
+            
             /**
              * Stop the time sync thread
              */
             void stop();
 
     };
+    /**
+     * Get current time in milliseconds
+     * @return Current time in milliseconds
+     */
+    unsigned long nowInMilliseconds();
+    /**
+     * Block thread for given time (ms)
+     * @param ms Time to sleep in milliseconds
+     */
+    void sleep(unsigned long ms);
+    /**
+     * Block thread until given time (ms)
+     * @param ms Future time in milliseconds
+     */
+    void sleepUntil(unsigned long ms);
     /**
      * Read time sync message
      * @param time_sync Time sync message
