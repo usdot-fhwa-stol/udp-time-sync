@@ -8,6 +8,7 @@ on:
      - develop
      - 'release/*'
      - 'feature/*'
+     - 'tt-154-*'
    tags:
      - 'carma-system-*'
 jobs:
