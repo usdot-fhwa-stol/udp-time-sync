@@ -40,5 +40,4 @@ PYBIND11_MODULE(libudp_time_sync, m)
             R"(If in simulation mode, starts independent thread to consume time sync messages and update carma-clock)")
         .def("stop", &time_sync::TimeSync::stop, 
             R"(If in simulation mode, stops independent thread to consume time sync messages and update carma-clock)");
-        ;
 }
