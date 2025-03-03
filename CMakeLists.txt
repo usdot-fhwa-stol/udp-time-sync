@@ -64,7 +64,7 @@ if (BUILD_TESTS)
 endif()
 
 if (CREATE_DEB_PACKAGE)
-    set(CPACK_DEBIAN_PACKAGE_DEPENDS "udp-socket (>= 1.0), carma-clock (>= 1.0), python3-dev")
+    set(CPACK_DEBIAN_PACKAGE_DEPENDS "udp-socket-1, carma-clock-1, python3-dev")
     set_target_properties(${PROJECT_NAME} PROPERTIES DEBUG_POSTFIX "")
     include(Packing)
 endif()

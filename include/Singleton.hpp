@@ -36,7 +36,16 @@ namespace time_sync {
              * Method for static singleton instance retrieval
              * @returns T singleton instance
              */ 
-            static T& getSingleton() ;
+            static T& getSingleton()  {
+                if ( !instance ) {
+                    throw SingletonException("Singleton has not been created");
+                } 
+                char strAddress[20];
+                snprintf(strAddress,sizeof(strAddress) ,"%p",std::addressof(instance) );
+                SPDLOG_TRACE("Singleton class : {0}.", typeid(instance.get()).name() );
+                SPDLOG_TRACE("Singleton address: {0}", strAddress);
+                return *instance;
+            };
             // Remove copy constructor 
             Singleton(const Singleton &) = delete;
             // Remove move constructor
@@ -52,7 +61,21 @@ namespace time_sync {
              * @param ...args constructor parameters of templated class.
              * @return returns reference to singleton instance.
              */
-            static T& create(Args...args );
+            static T& create(Args...args ) {
+                if (instance != nullptr){
+                    SPDLOG_WARN("Recreating Singleton of type {0}!", typeid(instance.get()).name());
+                    // Reset unique ptr
+                    
+                    instance.reset( new T(args...) );
+                  
+                  }
+                  else {
+                    SPDLOG_INFO("Initializing Singleton of type {0}!", typeid(instance.get()).name());
+                    instance = std::unique_ptr<T>( new T(args...) );
+                  }
+                  
+                  return *instance;
+            };
 
 
         protected:
@@ -73,4 +96,3 @@ namespace time_sync {
          
 };
 
-#include "internal/Singleton.tpp"
