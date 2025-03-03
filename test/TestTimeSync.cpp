@@ -34,15 +34,15 @@ TEST(TimeSync, now) {
 
 TEST(TimeSync, readTimeSyncMessage) {
 
-    std::string time_sync_message = "{\"timestamp\": 1231, \"timestep\": 1000}";
+    std::string time_sync_message = "{\"timestamp\": 1231, \"seq\": 1000}";
     auto timeSyncMessage = time_sync::readTimeSyncMessage(time_sync_message);
     EXPECT_EQ(timeSyncMessage.timestamp, 1231);
-    EXPECT_EQ(timeSyncMessage.timestep, 1000);
+    EXPECT_EQ(timeSyncMessage.seq, 1000);
 }
 
 TEST(TimeSync, readTimeSyncMessageInvalid) {
 
-    std::string time_sync_message = "{\"something\": 1231, \"timestep\": 1000}";
+    std::string time_sync_message = "{\"something\": 1231, \"seq\": 1000}";
     EXPECT_THROW( time_sync::readTimeSyncMessage(time_sync_message), std::runtime_error);
     time_sync_message = "{\"timestamp\": 1231, \"something\": 1000}";
     EXPECT_THROW( time_sync::readTimeSyncMessage(time_sync_message), std::runtime_error);
@@ -57,7 +57,7 @@ TEST(TimeSync, testStart) {
     time_sync::TimeSync sync;
     sync.start();  
     udp_socket::UdpClient client("127.0.0.1", 4567);
-    std::string time_sync_message = "{\"timestamp\": 1231, \"timestep\": 1000}";
+    std::string time_sync_message = "{\"timestamp\": 1231, \"seq\": 1000}";
     client.Send(time_sync_message);
     EXPECT_EQ(time_sync::nowInMilliseconds(), 1231); 
     EXPECT_NO_THROW(time_sync::sleepUntil(1231));

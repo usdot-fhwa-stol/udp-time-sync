@@ -57,7 +57,7 @@ namespace time_sync {
                     if(auto logger = spdlog::get("performance"); logger != nullptr ){
                         logger->info("{0},{1}", 
                             std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch()).count(), 
-                            ClockSingleton::time_in_ms());
+                            nowInMilliseconds());
                     }
                 }
             }
@@ -111,10 +111,10 @@ namespace time_sync {
             throw std::runtime_error( "Parsing error: time sync message " + time_sync + " is not a valid time sync message!" );    
         }
         message.timestamp =  document["timestamp"].GetUint64();
-        if (!document.IsObject() || !document.HasMember("timestep") || !document["timestep"].IsUint64()) {
+        if (!document.IsObject() || !document.HasMember("seq") || !document["seq"].IsUint64()) {
             throw std::runtime_error( "Parsing error: time sync message " + time_sync + " is not a valid time sync message!" );    
         }
-        message.timestep =  document["timestep"].GetUint64();
+        message.seq =  document["seq"].GetUint64();
         return message;
 
     }

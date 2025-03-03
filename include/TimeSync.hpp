@@ -31,7 +31,7 @@ namespace time_sync {
      */
     struct TimeSyncMessage {
         unsigned long timestamp;
-        unsigned long timestep;
+        unsigned long seq;
     };
     /**
      * TimeSync class
