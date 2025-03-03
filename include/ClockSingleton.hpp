@@ -35,7 +35,6 @@ namespace time_sync {
      * @author Paul Bourelly
      */
     class ClockSingleton : public Singleton<fwha_stol::lib::time::CarmaClock, bool> {
-        friend class Singleton<fwha_stol::lib::time::CarmaClock, bool>;
 
         public:
             /**
