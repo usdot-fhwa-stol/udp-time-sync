@@ -26,18 +26,18 @@ PYBIND11_MODULE(libudp_time_sync, m)
          `SIMULATION_MODE` is set to `TRUE`, this library will start a detached thread responsible for listening on a configurable 
          port of incoming UDP Time Synchronization messages that will allow services in the simulation environment to renaming synchronized 
          to dynamic timestep durations.)";
-
+    
+    m.def("nowInMilliseconds", &time_sync::nowInMilliseconds ,
+            R"(Get current time in milliseconds)");
+    m.def("sleepUntil", &time_sync::sleepUntil, py::arg("future_time"),
+        R"(Block thread until given time (ms))");
+    m.def("sleep_for", &time_sync::sleep, py::arg("time_to_sleep"),
+        R"(Block thread for given time (ms))");
     py::class_<time_sync::TimeSync>(m, "TimeSync")
         .def(py::init<std::string, unsigned int>(), py::arg("ip") = "127.0.0.1", py::arg("port") = 4567,
             R"(Constructor for TimeSync object)")
-        .def("nowInMilliseconds", &time_sync::TimeSync::nowInMilliseconds ,
-            R"(Get current time in milliseconds)")
         .def("start", &time_sync::TimeSync::start, 
             R"(If in simulation mode, starts independent thread to consume time sync messages and update carma-clock)")
         .def("stop", &time_sync::TimeSync::stop, 
-            R"(If in simulation mode, stops independent thread to consume time sync messages and update carma-clock)")
-        .def("sleepUntil", &time_sync::TimeSync::sleepUntil, py::arg("future_time"),
-            R"(Method will block thread until given time (ms))")
-        .def("sleep_for", &time_sync::TimeSync::sleep, py::arg("time_to_sleep"),
-            R"(Method will block thread for given time (ms))");
+            R"(If in simulation mode, stops independent thread to consume time sync messages and update carma-clock)");
 }

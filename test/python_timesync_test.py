@@ -24,11 +24,11 @@ class TestCarmaClock(unittest.TestCase):
         # Create a UDP socket
         client_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
         # Send data to the server
-        message = r'{"timestep": 1, "timestamp": 100}'
+        message = r'{ "timestamp": 100, "seq": 1}'
         client_socket.sendto(message.encode('utf-8'), SERVER_ADDRESS)
 
 
-        self.assertEqual( timeSync.nowInMilliseconds(), 100)
+        self.assertEqual( libTimeSync.nowInMilliseconds(), 100)
         client_socket.close()
 
 
