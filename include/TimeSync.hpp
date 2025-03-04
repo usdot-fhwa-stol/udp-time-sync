@@ -30,7 +30,7 @@ namespace time_sync {
      * TimeSyncMessage struct
      */
     struct TimeSyncMessage {
-        unsigned long timestamp;
+        unsigned long timestep;
         unsigned long seq;
     };
     /**
@@ -59,7 +59,7 @@ namespace time_sync {
              * @param ip IP address of the time sync server
              * @param port Port of the time sync server
              */
-            TimeSync(const std::string &ip = "127.0.0.1", unsigned int port = 4567);
+            TimeSync(const std::string &ip = "127.0.0.1", unsigned int port = 4567, bool debug = false);
             /**
              * If in simulation mode, starts independent thread to consume time sync messages and update carma-clock
              */

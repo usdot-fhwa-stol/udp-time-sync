@@ -16,7 +16,11 @@
 #include "TimeSync.hpp"
 
 namespace time_sync {
-    TimeSync::TimeSync(const std::string &ip , unsigned int port ) : initialized(false), _ip(ip), _port(port)  {}
+    TimeSync::TimeSync(const std::string &ip , unsigned int port, bool debug ) : initialized(false), _ip(ip), _port(port)  {
+        if (debug) {
+            spdlog::set_level(spdlog::level::debug);
+        }
+    }
  
     void TimeSync::start() {
         if (!initialized) {
@@ -52,7 +56,7 @@ namespace time_sync {
                     SPDLOG_DEBUG("TimeSync initialized!");
                 }
                 auto message = readTimeSyncMessage(time_sync);
-                ClockSingleton::update(message.timestamp);
+                ClockSingleton::update(message.timestep);
                 if (_performance_logging) {
                     if(auto logger = spdlog::get("performance"); logger != nullptr ){
                         logger->info("{0},{1}", 
@@ -107,10 +111,10 @@ namespace time_sync {
         if (document.HasParseError()) {
             throw std::runtime_error( "Parsing error: " + document.GetParseError() );
         }
-        if (!document.IsObject() || !document.HasMember("timestamp") || !document["timestamp"].IsUint64()) {
+        if (!document.IsObject() || !document.HasMember("timestep") || !document["timestep"].IsUint64()) {
             throw std::runtime_error( "Parsing error: time sync message " + time_sync + " is not a valid time sync message!" );    
         }
-        message.timestamp =  document["timestamp"].GetUint64();
+        message.timestep =  document["timestep"].GetUint64();
         if (!document.IsObject() || !document.HasMember("seq") || !document["seq"].IsUint64()) {
             throw std::runtime_error( "Parsing error: time sync message " + time_sync + " is not a valid time sync message!" );    
         }
