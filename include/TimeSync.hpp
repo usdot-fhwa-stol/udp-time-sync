@@ -21,6 +21,8 @@
 #include <rapidjson/document.h>
 #include <udp-socket/UdpServer.hpp>
 #include <atomic>
+#include <filesystem> // Requires C++17 or later
+
 namespace time_sync {
     /**
      * TimeSyncMessage struct

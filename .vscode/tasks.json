@@ -16,6 +16,11 @@
             ]
         },
         {
+            "label": "test",
+            "type": "shell",
+            "command": "${workspaceFolder}/build/udp_time_sync_test",
+        },
+        {
             "label": "clean",
             "type": "shell",
             "command": "rm -r ${workspaceFolder}/build"

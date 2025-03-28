@@ -60,9 +60,14 @@ namespace time_sync {
     }
 
     void TimeSync::performanceLog(unsigned long real_time, unsigned long carma_time) {
-        if (_performance_logging && _performance_log && _performance_log.is_open()) {
-            _performance_log << std::to_string(real_time) << "," << std::to_string(carma_time) << std::endl;
-            _performance_log.flush();
+        if (_performance_logging ) {
+            if (_performance_log && _performance_log.is_open()) {
+                _performance_log << std::to_string(real_time) << "," << std::to_string(carma_time) << std::endl;
+                _performance_log.flush();
+            }
+            else {
+                logDebug("Performance logging failed! Performance log file is not open!");
+            }
         }
     }
     void TimeSync::consumeTimeLoop() {
@@ -140,6 +145,12 @@ namespace time_sync {
     }
     bool TimeSync::createPerformanceLogger(){
         std::string log_dir = getSystemConfig("LOGS_DIR","/opt/carma/logs/");
+        if (!std::filesystem::exists(log_dir)) {
+            if (!std::filesystem::create_directories(log_dir)) {
+                std::cerr << "Error creating directory: " << log_dir << std::endl;
+                return false;
+            }
+        }
         std::string date_time = std::to_string(std::chrono::system_clock::to_time_t(std::chrono::system_clock::now()));
         std::string log_file = log_dir + "performance_" + date_time + ".csv";
         _performance_log.open(log_file);
