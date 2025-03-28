@@ -60,9 +60,14 @@ namespace time_sync {
     }
 
     void TimeSync::performanceLog(unsigned long real_time, unsigned long carma_time) {
-        if (_performance_logging && _performance_log && _performance_log.is_open()) {
-            _performance_log << std::to_string(real_time) << "," << std::to_string(carma_time) << std::endl;
-            _performance_log.flush();
+        if (_performance_logging ) {
+            if (_performance_log && _performance_log.is_open()) {
+                _performance_log << std::to_string(real_time) << "," << std::to_string(carma_time) << std::endl;
+                _performance_log.flush();
+            }
+            else {
+                logDebug("Performance logging failed! Performance log file is not open!");
+            }
         }
     }
     void TimeSync::consumeTimeLoop() {
