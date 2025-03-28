@@ -60,14 +60,9 @@ namespace time_sync {
     }
 
     void TimeSync::performanceLog(unsigned long real_time, unsigned long carma_time) {
-        if (_performance_logging ) {
-            if (_performance_log && _performance_log.is_open()) {
-                _performance_log << std::to_string(real_time) << "," << std::to_string(carma_time) << std::endl;
-                _performance_log.flush();
-            }
-            else {
-                logDebug("Performance logging failed! Performance log file is not open!");
-            }
+        if (_performance_logging && _performance_log && _performance_log.is_open()) {
+            _performance_log << std::to_string(real_time) << "," << std::to_string(carma_time) << std::endl;
+            _performance_log.flush();
         }
     }
     void TimeSync::consumeTimeLoop() {
@@ -156,7 +151,16 @@ namespace time_sync {
         _performance_log.open(log_file);
         if (!_performance_log.is_open()) {
             logDebug("Failed to open file " + log_file);
+            // Check for specific error flags
+            if (_performance_log.fail()) {
+                std::cerr << "Logical error on i/o operation" << std::endl;
+            } else if (_performance_log.bad()) {
+                std::cerr << "Read/writing error on i/o operation" << std::endl;
+            } else if (_performance_log.eof()) {
+                std::cerr << "End of file reached" << std::endl;
+            }
             perror(log_file.c_str());
+
             return false;
         }
         _performance_log << "Real Time (ms), Carma Time (ms)" << std::endl;
