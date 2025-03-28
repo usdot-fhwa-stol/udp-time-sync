@@ -34,7 +34,7 @@ PYBIND11_MODULE(libudp_time_sync, m)
     m.def("sleep_for", &time_sync::sleep, py::arg("time_to_sleep"),
         R"(Block thread for given time (ms))");
     py::class_<time_sync::TimeSync>(m, "TimeSync")
-        .def(py::init<std::string, unsigned int>(), py::arg("ip") = "127.0.0.1", py::arg("port") = 4567,
+        .def(py::init<std::string, unsigned int, bool>(), py::arg("ip") = "127.0.0.1", py::arg("port") = 4567, py::arg("debug") = false,
             R"(Constructor for TimeSync object)")
         .def("start", &time_sync::TimeSync::start, 
             R"(If in simulation mode, starts independent thread to consume time sync messages and update carma-clock)")

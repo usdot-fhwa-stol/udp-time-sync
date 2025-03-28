@@ -14,8 +14,8 @@
  * the License.
  */
 #pragma once
-#include <spdlog/spdlog.h>
 #include <typeinfo>
+#include <memory>
 #include "SingletonException.hpp"
 
 
@@ -42,8 +42,6 @@ namespace time_sync {
                 } 
                 char strAddress[20];
                 snprintf(strAddress,sizeof(strAddress) ,"%p",std::addressof(instance) );
-                SPDLOG_TRACE("Singleton class : {0}.", typeid(instance.get()).name() );
-                SPDLOG_TRACE("Singleton address: {0}", strAddress);
                 return *instance;
             };
             // Remove copy constructor 
@@ -63,14 +61,12 @@ namespace time_sync {
              */
             static T& create(Args...args ) {
                 if (instance != nullptr){
-                    SPDLOG_WARN("Recreating Singleton of type {0}!", typeid(instance.get()).name());
                     // Reset unique ptr
                     
                     instance.reset( new T(args...) );
                   
                   }
                   else {
-                    SPDLOG_INFO("Initializing Singleton of type {0}!", typeid(instance.get()).name());
                     instance = std::unique_ptr<T>( new T(args...) );
                   }
                   

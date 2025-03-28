@@ -33,9 +33,10 @@ TEST(TimeSync, now) {
 }
 
 TEST(TimeSync, readTimeSyncMessage) {
+    time_sync::TimeSync sync;
 
     std::string time_sync_message = "{\"timestep\": 1231, \"seq\": 1000}";
-    auto timeSyncMessage = time_sync::readTimeSyncMessage(time_sync_message);
+    auto timeSyncMessage = sync.readTimeSyncMessage(time_sync_message);
     EXPECT_EQ(timeSyncMessage.timestep, 1231);
     EXPECT_EQ(timeSyncMessage.seq, 1000);
 }
@@ -43,18 +44,20 @@ TEST(TimeSync, readTimeSyncMessage) {
 TEST(TimeSync, readTimeSyncMessageInvalid) {
 
     std::string time_sync_message = "{\"something\": 1231, \"seq\": 1000}";
-    EXPECT_THROW( time_sync::readTimeSyncMessage(time_sync_message), std::runtime_error);
+    time_sync::TimeSync sync;
+
+    EXPECT_THROW( sync.readTimeSyncMessage(time_sync_message), std::runtime_error);
     time_sync_message = "{\"timestep\": 1231, \"something\": 1000}";
-    EXPECT_THROW( time_sync::readTimeSyncMessage(time_sync_message), std::runtime_error);
+    EXPECT_THROW( sync.readTimeSyncMessage(time_sync_message), std::runtime_error);
     time_sync_message = "invalidJson";
-    EXPECT_THROW( time_sync::readTimeSyncMessage(time_sync_message), std::runtime_error);
+    EXPECT_THROW( sync.readTimeSyncMessage(time_sync_message), std::runtime_error);
 }
 
 TEST(TimeSync, testStart) {
     setenv("SIMULATION_MODE", "TRUE", 1);
     setenv("PERFORMANCE_LOGGING", "TRUE", 1);
 
-    time_sync::TimeSync sync;
+    time_sync::TimeSync sync("127.0.0.1", 4567, true);
     sync.start();  
     udp_socket::UdpClient client("127.0.0.1", 4567);
     std::string time_sync_message = "{\"timestep\": 1231, \"seq\": 1000}";

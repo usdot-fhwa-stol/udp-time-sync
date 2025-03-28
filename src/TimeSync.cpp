@@ -16,9 +16,14 @@
 #include "TimeSync.hpp"
 
 namespace time_sync {
-    TimeSync::TimeSync(const std::string &ip , unsigned int port, bool debug ) : initialized(false), _ip(ip), _port(port)  {
-        if (debug) {
-            spdlog::set_level(spdlog::level::debug);
+    TimeSync::TimeSync(const std::string &ip , unsigned int port, bool debug ) : initialized(false), _ip(ip), _port(port), _debug(debug) ,_performance_log() {
+        
+    }
+
+    TimeSync::~TimeSync() {
+        stop();
+        if ( _performance_log && _performance_log.is_open()) {
+            _performance_log.close();
         }
     }
  
@@ -34,35 +39,46 @@ namespace time_sync {
                 std::string performance_logging = getSystemConfig("PERFORMANCE_LOGGING","FALSE");
                 _performance_logging = performance_logging.compare("true") == 0 || performance_logging.compare("TRUE") == 0 ;
                 if (_performance_logging) {
-                    SPDLOG_DEBUG("Performance logging is enabled!");
-                    auto logger = createLogger("performance", ".csv", "%v", spdlog::level::info);
-                    logger->info("Real Time (ms), Carma Time (ms)");
+                    logDebug("Performance logging is enabled!");
+                    if (!createPerformanceLogger()) {
+                        logDebug("Failed to create performance logger!");
+                    }
                 }
                 // Initalize kafka consumer
-                SPDLOG_INFO("TimeSync is in simulation mode!");
+                logDebug("TimeSync is in simulation mode!");
                 _time_consumer= std::make_unique<udp_socket::UdpServer>(_ip, _port);
                 consumer_thread = std::thread(&TimeSync::consumeTimeLoop, this);
                 consumer_thread.detach();
             }
         }
     }
+
+    void TimeSync::logDebug(const std::string &msg) const{
+        if (_debug) {
+            std::cout << "[DEBUG]"  <<  msg << std::endl;
+        }
+    }
+
+    void TimeSync::performanceLog(unsigned long real_time, unsigned long carma_time) {
+        if (_performance_logging && _performance_log && _performance_log.is_open()) {
+            _performance_log << std::to_string(real_time) << "," << std::to_string(carma_time) << std::endl;
+            _performance_log.flush();
+        }
+    }
     void TimeSync::consumeTimeLoop() {
         while (_running) {
             std::string time_sync = _time_consumer->stringTimedReceive(100);
-            SPDLOG_DEBUG("TimeSync message: {0}", time_sync);
+            logDebug("TimeSync message received : " + time_sync);
             if (!time_sync.empty()) {
                 if (!initialized) {
                     initialized = true;
-                    SPDLOG_DEBUG("TimeSync initialized!");
+                    logDebug("TimeSync initialized!");
                 }
                 auto message = readTimeSyncMessage(time_sync);
                 ClockSingleton::update(message.timestep);
                 if (_performance_logging) {
-                    if(auto logger = spdlog::get("performance"); logger != nullptr ){
-                        logger->info("{0},{1}", 
-                            std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch()).count(), 
-                            nowInMilliseconds());
-                    }
+                    // Log Real Time and CARMA Time 
+                    performanceLog(std::chrono::system_clock::to_time_t(std::chrono::system_clock::now()), nowInMilliseconds());
                 }
             }
         }
@@ -85,29 +101,29 @@ namespace time_sync {
     void sleepUntil(unsigned long ms) {
         ClockSingleton::sleep_until(ms);
     }
-    std::string getSystemConfig(const char *config_name, const std::string &default_val) {
+    std::string TimeSync::getSystemConfig(const char *config_name, const std::string &default_val) const {
         // Check for config_name nullptr and use default value
         if (config_name == nullptr ) {
-            SPDLOG_WARN("System config_name was nullptr! Using default value {0}!" , default_val);
+            logDebug("System config_name was nullptr! Using default value " + default_val);
             return default_val;
         }
         // If std::getenv(config_name) returns value, use this value
         if (const auto config = std::getenv(config_name)) {
-            SPDLOG_DEBUG("Reading system config {0} as : {1}!", config_name, config);
+            logDebug("Reading system config " + std::string(config_name) + " as : " + std::string(config));
             return config;
         }
         // If std::getenv(config_name) returns nullptr, environment variable was not set so use default
         else {
-            SPDLOG_WARN("System config {0} was not set! Using default value {1}!" ,config_name, default_val);
+            logDebug("System config " + std::string(config_name) + " was not set! Using default value " + default_val);
             return default_val;
         }
     }
 
-    TimeSyncMessage readTimeSyncMessage(const std::string &time_sync) {
+    TimeSyncMessage TimeSync::readTimeSyncMessage(const std::string &time_sync) const{
         TimeSyncMessage message;
         rapidjson::Document document;
         document.Parse(time_sync.c_str());
-        SPDLOG_DEBUG("Parsing time sync message: {0}", time_sync);
+        logDebug("Parsing time sync message: " + time_sync);
         if (document.HasParseError()) {
             throw std::runtime_error( "Parsing error: " + document.GetParseError() );
         }
@@ -122,18 +138,28 @@ namespace time_sync {
         return message;
 
     }
-    std::shared_ptr<spdlog::logger> createLogger(const std::string &name, const std::string &extension, const std::string &pattern, const spdlog::level::level_enum &level){
+    bool TimeSync::createPerformanceLogger(){
         std::string log_dir = getSystemConfig("LOGS_DIR","/opt/carma/logs/");
         std::string date_time = std::to_string(std::chrono::system_clock::to_time_t(std::chrono::system_clock::now()));
-        auto logger  = spdlog::basic_logger_mt<spdlog::async_factory>(
-                name,  // logger name
-                log_dir + name +date_time + extension  // log file name and path
-            );
-        // Only log log statement content
-        logger->set_pattern(pattern);
-        logger->set_level(level);
-        logger->flush_on(level);
-        return logger;
+        std::string log_file = log_dir + "performance_" + date_time + ".csv";
+        _performance_log.open(log_file);
+        if (!_performance_log.is_open()) {
+            logDebug("Failed to open file " + log_file);
+            // Check for specific error flags
+            if (_performance_log.fail()) {
+                std::cerr << "Logical error on i/o operation" << std::endl;
+            } else if (_performance_log.bad()) {
+                std::cerr << "Read/writing error on i/o operation" << std::endl;
+            } else if (_performance_log.eof()) {
+                std::cerr << "End of file reached" << std::endl;
+            }
+            perror(log_file.c_str());
+
+            return false;
+        }
+        _performance_log << "Real Time (ms), Carma Time (ms)" << std::endl;
+        _performance_log.flush();  
+        return true;
     }
 
 }

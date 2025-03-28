@@ -15,15 +15,11 @@
  */
 #pragma once
 #include <thread>
-#include <spdlog/spdlog.h>
-
+#include <iostream>
+#include <fstream>
 #include "ClockSingleton.hpp"
 #include <rapidjson/document.h>
 #include <udp-socket/UdpServer.hpp>
-#include <spdlog/spdlog.h>
-#include <spdlog/async.h> //support for async logging.
-#include <spdlog/sinks/basic_file_sink.h>
-#include <spdlog/sinks/stdout_color_sinks.h> // or "../stdout_sinks.h" if no colors needed
 #include <atomic>
 namespace time_sync {
     /**
@@ -45,6 +41,8 @@ namespace time_sync {
 
             std::string _ip;
             unsigned int _port;
+            bool _debug = false;
+            std::ofstream  _performance_log;
 
             std::thread consumer_thread;
             std::unique_ptr<udp_socket::UdpServer> _time_consumer;          
@@ -53,6 +51,25 @@ namespace time_sync {
              */
             void consumeTimeLoop();
 
+            void logDebug(const std::string &msg) const;
+
+            void performanceLog(unsigned long real_time, unsigned long carma_time);
+
+        
+            /**
+             * Get system config value (environment variable)
+             * @param config_name Name of the config
+             * @param default_val Default value if config is not set
+             * @return Value of the config 
+             */
+            std::string getSystemConfig(const char *config_name, const std::string &default_val) const;
+
+             /**
+             * Create a Performance logger that logs real time and carma time
+             * @return bool True if logger is created successfully
+             */
+            bool createPerformanceLogger();
+
         public:
             /**
              * Constructor for TimeSync object
@@ -60,6 +77,8 @@ namespace time_sync {
              * @param port Port of the time sync server
              */
             TimeSync(const std::string &ip = "127.0.0.1", unsigned int port = 4567, bool debug = false);
+
+            ~TimeSync();
             /**
              * If in simulation mode, starts independent thread to consume time sync messages and update carma-clock
              */
@@ -69,6 +88,13 @@ namespace time_sync {
              * Stop the time sync thread
              */
             void stop();
+
+            /**
+             * Read time sync message
+             * @param time_sync Time sync message
+             * @return Timestamp of the time sync message
+             */
+            TimeSyncMessage readTimeSyncMessage(const std::string &time_sync) const;
 
     };
     /**
@@ -86,27 +112,7 @@ namespace time_sync {
      * @param ms Future time in milliseconds
      */
     void sleepUntil(unsigned long ms);
-    /**
-     * Read time sync message
-     * @param time_sync Time sync message
-     * @return Timestamp of the time sync message
-     */
-    TimeSyncMessage readTimeSyncMessage(const std::string &time_sync);
-    /**
-     * Get system config value (environment variable)
-     * @param config_name Name of the config
-     * @param default_val Default value if config is not set
-     * @return Value of the config 
-     */
-    std::string getSystemConfig(const char *config_name, const std::string &default_val) ;
+    
 
-    /**
-     * Create a logger
-     * @param name Name of the logger
-     * @param extension Extension of the log file
-     * @param pattern Pattern of the log message
-     * @param level Log level
-     * @return Shared pointer to the logger
-     */
-    std::shared_ptr<spdlog::logger> createLogger(const std::string &name, const std::string &extension, const std::string &pattern, const spdlog::level::level_enum &level);
+   
 }

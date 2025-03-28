@@ -20,14 +20,11 @@ namespace time_sync {
     void ClockSingleton::update( uint64_t timestep) {
         auto &inst = getSingleton();
         inst.update(timestep);
-        SPDLOG_TRACE("streets clock is updated to {0}", timestep);
     }
 
     uint64_t ClockSingleton::time_in_ms() {
         auto &inst = getSingleton();
-        SPDLOG_TRACE("Calling thread is waiting on streets clock initialization.");
         inst.wait_for_initialization();
-        SPDLOG_TRACE("Thread is released after initialization.");
         return inst.nowInMilliseconds();
     }
 
