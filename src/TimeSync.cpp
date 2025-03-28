@@ -156,16 +156,7 @@ namespace time_sync {
         _performance_log.open(log_file);
         if (!_performance_log.is_open()) {
             logDebug("Failed to open file " + log_file);
-            // Check for specific error flags
-            if (_performance_log.fail()) {
-                std::cerr << "Logical error on i/o operation" << std::endl;
-            } else if (_performance_log.bad()) {
-                std::cerr << "Read/writing error on i/o operation" << std::endl;
-            } else if (_performance_log.eof()) {
-                std::cerr << "End of file reached" << std::endl;
-            }
             perror(log_file.c_str());
-
             return false;
         }
         _performance_log << "Real Time (ms), Carma Time (ms)" << std::endl;
