@@ -1,7 +1,6 @@
 find_package(udp-socket REQUIRED)
 find_package(carma-clock REQUIRED)
 find_package(RapidJSON REQUIRED)
-find_package(spdlog REQUIRED)
 find_package(Python3 REQUIRED COMPONENTS Interpreter Development)
 include(GetCPM)
 set(CPM_USE_LOCAL_PACKAGES ON)

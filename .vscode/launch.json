@@ -8,7 +8,7 @@
             "name": "gdb debugger",
             "type": "cppdbg",
             "request": "launch",
-            "program": "${workspaceFolder}/build/udp-time-sync_test",
+            "program": "${workspaceFolder}/build/udp_time_sync_test",
             "args": [],
             "stopAtEntry": true,
             "cwd": "${fileDirname}",

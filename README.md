@@ -22,7 +22,6 @@ The easiest way to include the UDP Time Sync Library in your application is to i
 - CMake 3.10
 - Python 3
 - [rapidjson](https://github.com/Tencent/rapidjson)
-- [spdlog](https://github.com/gabime/spdlog)
 - [carma-clock](https://github.com/usdot-fhwa-stol/carma-time-lib)
 - [udp-socket](https://github.com/usdot-fhwa-stol/udp-socket)
 

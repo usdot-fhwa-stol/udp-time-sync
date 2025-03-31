@@ -22,7 +22,6 @@ option(CREATE_DEB_PACKAGE "Create Debian Package" OFF)
 
 include(cmake/dependencies.cmake)
 
-add_definitions(-DSPDLOG_ACTIVE_LEVEL=SPDLOG_LEVEL_TRACE)
 add_definitions(-DRAPIDJSON_HAS_STDSTRING=1)
 
 
@@ -39,7 +38,6 @@ target_link_libraries(${PROJECT_NAME} PUBLIC
     ::udp-socket
     ::carma-clock 
     rapidjson 
-    spdlog
     Python3::Python
     pybind11::module
 )

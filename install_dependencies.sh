@@ -16,16 +16,6 @@ cmake --install build
 cd .. 
 rm -r rapidjson
 
-#Install spdlog
-echo " ------> Install spdlog... "
-cd /tmp
-git clone https://github.com/gabime/spdlog.git -b v1.12.0
-cd spdlog 
-cmake -Bbuild -DCMAKE_POSITION_INDEPENDENT_CODE=ON 
-cmake --build build
-cmake --install build
-cd .. 
-rm -r spdlog
 
 
 /opt/carma/scripts/install_dependencies_script.sh python3-dev carma-clock-1 udp-socket-1

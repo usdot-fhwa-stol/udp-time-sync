@@ -15,7 +15,6 @@
  */
 #pragma once
 #include "Singleton.hpp"
-#include <spdlog/spdlog.h>
 #include <carma-clock/carma_clock.h>
 
 namespace time_sync {
