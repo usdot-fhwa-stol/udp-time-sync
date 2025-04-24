@@ -22,6 +22,8 @@
 #include <udp-socket/UdpServer.hpp>
 #include <atomic>
 #include <filesystem> // Requires C++17 or later
+#include <unistd.h> // For getpid()
+
 
 namespace time_sync {
     /**
@@ -115,6 +117,12 @@ namespace time_sync {
      */
     void sleepUntil(unsigned long ms);
     
+    /**
+     * Get process name from process ID
+     * @param processId Process ID
+     * @return Process name without path
+     */
+    std::string getProcessNameFromId(pid_t processId) ;
 
    
 }

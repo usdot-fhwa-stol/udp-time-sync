@@ -151,8 +151,11 @@ namespace time_sync {
                 return false;
             }
         }
+         // Get the process ID
+        pid_t pid = getpid();
+        std::string process_name = getProcessNameFromId(pid);
         std::string date_time = std::to_string(std::chrono::system_clock::to_time_t(std::chrono::system_clock::now()));
-        std::string log_file = log_dir + "performance_" + date_time + ".csv";
+        std::string log_file = log_dir + process_name +"_performance_" + date_time + ".csv";
         _performance_log.open(log_file);
         if (!_performance_log.is_open()) {
             logDebug("Failed to open file " + log_file);
@@ -162,6 +165,22 @@ namespace time_sync {
         _performance_log << "Real Time (ms), Carma Time (ms)" << std::endl;
         _performance_log.flush();  
         return true;
+    }
+
+
+    std::string getProcessNameFromId(pid_t processId) {
+        std::stringstream ss;
+        ss << "/proc/" << processId << "/cmdline";
+        std::ifstream cmdlineFile(ss.str());
+
+        if (!cmdlineFile.is_open()) {
+            return "";
+        }
+
+        std::string processName;
+        std::getline(cmdlineFile, processName, '\0');
+        processName.find_last_of('/') != std::string::npos ? processName = processName.substr(processName.find_last_of('/') + 1) : processName;
+        return processName;
     }
 
 }
