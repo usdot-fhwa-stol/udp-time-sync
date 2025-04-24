@@ -15,6 +15,7 @@ class TestCarmaClock(unittest.TestCase):
 
     def testSimClockInitializeException(self):
         os.environ['SIMULATION_MODE'] = 'TRUE'
+        os.environ['PERFORMANCE_LOGGING'] = 'TRUE'
 
         timeSync = libTimeSync.TimeSync()
         timeSync.start()
