@@ -83,7 +83,9 @@ namespace time_sync {
                 ClockSingleton::update(message.timestep);
                 if (_performance_logging) {
                     // Log Real Time and CARMA Time 
-                    performanceLog(std::chrono::system_clock::to_time_t(std::chrono::system_clock::now()), nowInMilliseconds());
+                    performanceLog(
+                        std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch()).count(), 
+                        nowInMilliseconds());
                 }
             }
         }
