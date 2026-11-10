@@ -16,7 +16,7 @@ jobs:
       matrix:
         include:
           - architecture: x64
-            ubuntu: focal
+            ubuntu: resolute
             build: true
           - architecture: x64
             ubuntu: jammy
