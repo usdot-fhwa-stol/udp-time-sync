@@ -17,16 +17,17 @@ jobs:
         include:
           - architecture: x64
             ubuntu: resolute
+            build-image-tag: ci-update-ubuntu-runner-resolute
             build: true
           - architecture: x64
             ubuntu: jammy
             build: true
-    uses: usdot-fhwa-stol/actions/.github/workflows/cpp-module-build.yml@main
+    uses: usdot-fhwa-stol/actions/.github/workflows/cpp-module-build.yml@ci/update-ubuntu-runner
     with:
       component-name: ${{ matrix.ubuntu }}
       build: ${{ matrix.build }}
       build-architecture: ${{ matrix.architecture }}
-      build-image-tag: ${{ matrix.ubuntu }}
+      build-image-tag: ${{ matrix.build-image-tag || matrix.ubuntu }}
     secrets:
       aws-access-key-id: ${{ secrets.APT_REPO_AWS_ACCESS_KEY_ID }}
       aws-secret-access-key: ${{ secrets.APT_REPO_AWS_SECRET_ACCESS_KEY }}
